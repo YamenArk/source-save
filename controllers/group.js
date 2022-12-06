@@ -25,16 +25,15 @@ exports.add_group = (req,res,next) =>
             error.statusCode = 404;
             throw error;
         }
-        Group.create({
+        return Group.create({
             name : name,
             admin : req.userId
         })
     })
-    .then(() =>{
-        res.status(201).json({
-            message : 'groups created successfully'
-        });
-        NonFunction.save_req_res('/group/add_group','post',req.userId,201,'groups created successfully',next)  
+    .then(group =>{
+        res.status(201).send(group);
+        var jsonmessage = JSON.stringify(group);
+        NonFunction.save_req_res('/group/add_group','post',req.userId,201,jsonmessage,next)  
 
     })
     .catch(err =>{
