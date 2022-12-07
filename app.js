@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const dotenv = require("dotenv");
 const cluster = require('cluster');
 const { generateKeyPair } = require('crypto');
 
@@ -23,6 +24,8 @@ connection.query(
 
 connection.end();
 
+
+dotenv.config();
 
 
 const sequelize = require('./util/database');
@@ -107,7 +110,7 @@ else
     // .sync({   force: true })
     .sync()
     .then(result => {
-      app.listen(3000, err => {
+      app.listen(process.env.PORT, err => {
         err ?
           console.log("Error in server setup") :
           console.log("=====================")

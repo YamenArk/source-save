@@ -49,6 +49,7 @@ exports.myfiles = async (req,res,next) =>{
             if(myfiles[i].status == false)
             {
                  sending_array.push({
+                    fileId : myfiles[i].id,
                     fileName : myfiles[i].name,
                     fileUrl : myfiles[i].fileUrl,
                     state : 'close',
@@ -60,6 +61,7 @@ exports.myfiles = async (req,res,next) =>{
                 checkInUserId = myfiles[i].checkInUserId;
                 checkInUser = await User.findByPk(checkInUserId);
                  sending_array.push({
+                    fileId : myfiles[i].id,
                     fileName : myfiles[i].name,
                     fileUrl : myfiles[i].fileUrl,
                     state : 'open',
@@ -139,6 +141,7 @@ exports.show_files_in_group = async (req,res,next) => {
             if(myfiles[i].status == false)
             {
                 sending_array.push({
+                    fileId : myfiles[i].id,
                     fileName : myfiles[i].name,
                     fileUrl : myfiles[i].fileUrl,
                     state : 'close',
@@ -409,10 +412,7 @@ exports.check_out = async(req,res,next) =>{
 
 
 const clearFile = filePath => {
-    console.log("======================")
-    console.log(filePath)
     filePath = path.join(__dirname, '../public', filePath);
-    console.log("=====================")
 
     fs.unlink(filePath, err => console.log());
     // fs.rmdir(filePath, { recursive: true }, err => console.log(err));
