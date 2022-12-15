@@ -1,7 +1,10 @@
 const express = require('express');
 
 const fileController = require('../controllers/file');
-const isAuth = require('../middleware/auth');
+const Auth = require('../middleware/auth');
+const sequelize = require('../util/database')
+const request = require('../middleware/req');
+const response = require('../middleware/res');
 
 var uuid = require('uuid');
 const path = require('path');
@@ -36,13 +39,105 @@ var storage = multer.diskStorage({
 const router = express.Router();
 
 ///////////////////////////////////////////////////////// files
-router.get('/read_file',isAuth,fileController.read);
-router.put('/check_in',isAuth,fileController.check_in);
-router.put('/check_out',upload.single('file'),isAuth,fileController.check_out);
+router.get('/read_file',async function(req, res,next){
+
+    try
+    {
+        transaction = await sequelize.transaction();
+        await Auth.isAuth(req,res,next);
+        await request.req(transaction,req, res,next)
+        await fileController.read(req, res,next);   
+        await response.res(transaction,req, res,next)
+        await transaction.commit();
+    }
+    catch(err)
+    {   
+        if (transaction) await transaction.rollback();
+        next(err);
+    }
+    });
+  
+
+router.put('/check_in',async function(req, res,next){
+
+    try
+    {
+        transaction = await sequelize.transaction();
+        await Auth.isAuth(req,res,next);
+        await request.req(transaction,req, res,next)
+        await fileController.check_in(req, res,next);   
+        await response.res(transaction,req, res,next)
+        await transaction.commit();
+    }
+    catch(err)
+    {   
+        if (transaction) await transaction.rollback();
+        next(err);
+    }
+    });
 
 
-router.get('/myfiles',isAuth,fileController.myfiles);
-router.get('/show_files_in_group/:groupId',isAuth,fileController.show_files_in_group);
+
+router.put('/check_out',upload.single('file'),async function(req, res,next){
+
+    try
+    {
+        console.log("===========")
+        transaction = await sequelize.transaction();
+        await Auth.isAuth(req,res,next);
+        await request.req(transaction,req, res,next)
+        await fileController.check_out(req, res,next);   
+        await response.res(transaction,req, res,next)
+        await transaction.commit();
+    }
+    catch(err)
+    {   
+        if (transaction) await transaction.rollback();
+        next(err);
+    }
+    });
+  
+
+
+router.get('/myfiles',async function(req, res,next){
+
+    try
+    {
+        transaction = await sequelize.transaction();
+        await Auth.isAuth(req,res,next);
+        await request.req(transaction,req, res,next)
+        await fileController.myfiles(req, res,next);   
+        await response.res(transaction,req, res,next)
+        await transaction.commit();
+    }
+    catch(err)
+    {   
+        if (transaction) await transaction.rollback();
+        next(err);
+    }
+    });
+  
+
+
+router.get('/show_files_in_group/:groupId',async function(req, res,next){
+
+    try
+    {
+        transaction = await sequelize.transaction();
+        await Auth.isAuth(req,res,next);
+        await request.req(transaction,req, res,next)
+        await fileController.show_files_in_group(req, res,next);   
+        await response.res(transaction,req, res,next)
+        await transaction.commit();
+    }
+    catch(err)
+    {   
+        if (transaction) await transaction.rollback();
+        next(err);
+    }
+    });
+  
+
 
 
 module.exports = router;

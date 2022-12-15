@@ -1,48 +1,36 @@
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const NonFunction = require('./non-functional')
 const sequelize = require('../util/database');
 
 
 
-exports.login = (req,res,next) =>{
+exports.login = async(req,res,next) =>{
     const username = req.body.username;
     const password = req.body.password;
-    User.findOne({where :{username : username,password : password}})
-    .then(user =>{
-        if(!user)
+    const user = await User.findOne({where :{username : username,password : password}})
+    if(!user)
+    {
+        const error = new Error('plz check the username or the password');
+        error.statusCode = 401;
+        throw error;
+    }
+    const token = jwt.sign(
         {
-            const error = new Error('plz check the username or the password');
-            error.statusCode = 401;
-            throw error;
-        }
-        const token = jwt.sign(
-            {
-              userId : user.id,
-              isAdmin : user.admin
-            },
-            'somesupersecretsecret',
-            { expiresIn: '1y' }
-          );
-        res.status(200).send({
-            user : user,
-            token : token
-        })
-
-        var message = [];
-        message.push(user);
-        message.push(token);
-        var jsonmessage = JSON.stringify(message);
-        NonFunction.save_req_res('/login','post',user.id,200,jsonmessage,next)  
+          userId : user.id,
+          isAdmin : user.admin
+        },
+        'somesupersecretsecret',
+        { expiresIn: '1y' }
+      );
+    res.status(200).send({
+        user : user,
+        token : token
     })
-    .catch(err =>{
-        if(!err.statusCode)
-        {
-        err.status = 500;
-        }
-        NonFunction.save_req_res('/login','post',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    });
+    req.userId  =  user.id;
+    var message = [];
+    message.push(user);
+    message.push(token);
+    req.message = JSON.stringify(message);
 }
 
 
@@ -58,7 +46,7 @@ exports.signup = async(req,res,next) => {
             username : username,
             password : password,
             admin : 0
-        }, { transaction: t })
+        })
     
         // await User.create({
         //     email : '213213',
@@ -67,14 +55,14 @@ exports.signup = async(req,res,next) => {
         //     admin : 0
         // }, { transaction: t })
     
-        await t.commit();
+        // await t.commit();
         res.status(200).json({
             message : "your account has been created"
         })     
     }
     catch(err)
     {
-        await t.rollback();
+        // await t.rollback();
         if (!err.statusCode) {
             err.statusCode = 500;
           }

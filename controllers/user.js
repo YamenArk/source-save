@@ -2,13 +2,10 @@ const User = require('../models/user');
 const Filee = require('../models/filee')
 const History = require('../models/history');   
 const { use } = require('../routes/auth');
-const NonFunction = require('./non-functional')
 
 ////////////////////////////////////////////////////user
 exports.get_users = async (req,res,next)=>{
     let  users;
-    try
-    {
 
         users = await User.findAll() ;
         if(!users || users.length == 0)
@@ -17,19 +14,8 @@ exports.get_users = async (req,res,next)=>{
             error.statusCode = 404;
             throw error;
         }
+        req.message = JSON.stringify(users);
         res.status(200).send(users);
-        var jsonmessage = JSON.stringify(users);
-        NonFunction.save_req_res('/user/get_users','get',req.userId,200,jsonmessage,next)  
-
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-          NonFunction.save_req_res('/user/get_users','get',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    }
 }
 
 // exports.get_user = (req,res,next) =>{
@@ -56,11 +42,9 @@ exports.get_users = async (req,res,next)=>{
 
 
 exports.file_history = async(req,res,next) => { 
-    try
-    {
         let user;
         const fileId = req.body.fileId;
-        let sending_message = '';
+        let sending_message = [];
         const file = await History.findAll({where : { fileeId : fileId}})
         if(file.length === 0 )
         {
@@ -74,35 +58,26 @@ exports.file_history = async(req,res,next) => {
             user = await User.findByPk(file[i].userId);
             if(file[i].status == true)
             {
-                sending_message =sending_message+"file opened in "+file[i].createdAt+" from "+user.username+"\n"
+                sending_message[i] ="file opened in "+file[i].createdAt+" from "+user.username
             }
             else
             {
-                sending_message =sending_message+"file closed in "+file[i].createdAt+" from "+user.username+"\n"
+                sending_message[i] ="file closed in "+file[i].createdAt+" from "+user.username
             }
             i++;
         }
+
+        req.message = JSON.stringify(sending_message);
+
+        console.log("====================")
+        console.log(req.message)
         res.status(200).send(sending_message);
-        var jsonmessage = JSON.stringify(sending_message);
-        NonFunction.save_req_res('/user/fileHistory','get',req.userId,200,jsonmessage,next)  
-    }
-    catch(err)
-    {
-        console.log(err)
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/user/fileHistory','get',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    }
 }
 
 
 
 
 exports.user_history = async(req,res,next) => {
-    try
-    {
         let file;
         const userId = req.body.userId;
         let sending_message = '';
@@ -127,17 +102,6 @@ exports.user_history = async(req,res,next) => {
             }
             i++;
         }
-        res.status(200).send(sending_message);
-        var jsonmessage = JSON.stringify(sending_message);
-        NonFunction.save_req_res('/user/userHistory','get',req.userId,200,jsonmessage,next)  
-    }
-    catch(err)
-    {
-        console.log(err)
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/user/userHistory','get',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    }
+        req.message = JSON.stringify(sending_message);
+        res.status(200).send(req.message);
 }

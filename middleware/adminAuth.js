@@ -1,11 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user')
 
-module.exports = async (req, res, next) => {
-
-try
-
-{
+exports.isAuth = async (req, res, next) => {
   const authHeader = req.get('authorization');
   
   if (!authHeader) {
@@ -34,13 +30,4 @@ try
     error.statusCode = 401;
     throw error;
   } 
-  next();
-}
-catch(err)
-{
-  if (!err.statusCode) {
-    err.statusCode = 500;
-  }
-  next(err);
-};
 };

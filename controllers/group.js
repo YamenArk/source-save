@@ -3,7 +3,6 @@ const Filee = require('../models/filee');
 const Sequelize = require('sequelize');
 const Group = require('../models/group');
 const GroupUser = require('../models/group-user');
-const NonFunction = require('./non-functional')
 const path = require('path');
 const fs = require('fs');
 
@@ -14,42 +13,31 @@ const Op = Sequelize.Op;
 
 
 ////////////////////////////////////////////////////user
-exports.add_group = (req,res,next) =>
+exports.add_group = async(transaction,req,res,next) =>
 {
-    const name = req.body.name;
-    User.findByPk(req.userId)
-    .then(user =>{
+    
+        const name = req.body.name;
+        const user = await User.findByPk(req.userId)
+
         if(!user)
-        {
-            const error = new Error('Could not find this user.');
-            error.statusCode = 404;
-            throw error;
-        }
-        return Group.create({
+            {
+                const error = new Error('Could not find this user.');
+                error.statusCode = 404;
+                throw error;
+            }
+        const group = await  Group.create({
             name : name,
             admin : req.userId
-        })
-    })
-    .then(group =>{
+        },{ transaction: transaction })
+    
+        req.message = JSON.stringify(group);
         res.status(201).send(group);
-        var jsonmessage = JSON.stringify(group);
-        NonFunction.save_req_res('/group/add_group','post',req.userId,201,jsonmessage,next)  
-
-    })
-    .catch(err =>{
-        if(!err.statusCode)
-        {
-        err.status = 500;
-        }
-        NonFunction.save_req_res('/group/add_group','post',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    });
 }
 
 
+
+
 exports.get_groups = async(req,res,next)=>{
-    try
-    {
         const user = await User.findByPk(req.userId);
         if(!user)
         {
@@ -83,26 +71,12 @@ exports.get_groups = async(req,res,next)=>{
         var message = [];
         message.push(admin);
         message.push(groups);
-        var jsonmessage = JSON.stringify(message);
-
+        req.message = JSON.stringify(message);
 
         res.status(200).json({
             admin : admin,
             groups : groups
         })
-
-        //saving request and res
-        NonFunction.save_req_res('/group/get_groups','get',req.userId,201,jsonmessage,next)  
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/group/get_groups','get',req.userId,err.statusCode,err.message,next)  
-
-        next(err);
-    }
 }
 
 
@@ -113,8 +87,6 @@ exports.get_groups = async(req,res,next)=>{
 
 
 exports.add_user_to_group = async(req,res,next) =>{
-    try
-    {
         const groupId = req.params.groupId;
         const AddedUserId = req.params.userId;
 
@@ -169,28 +141,17 @@ exports.add_user_to_group = async(req,res,next) =>{
             throw error; 
         }
          await user.addGroup(group);
-
+        req.message = 'it has been added successfully';
         res.status(200).send({
             message : 'it has been added successfully'
         })
-        NonFunction.save_req_res('/group/add_group','put',req.userId,200,'it has been added successfully',next)  
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/group/add_group','put',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    }
 }
 
 
 
 ////////////////////////////////
 exports.delete_user_from_group = async (req,res,next) =>{
-    try
-    {
+   
         const groupId = req.params.groupId;
         const deleteUserId = req.params.userId;
 
@@ -241,22 +202,10 @@ exports.delete_user_from_group = async (req,res,next) =>{
             groupId :group.id ,
             userId : deleteUserId
         }})
+        req.message = 'it has been deleted successfully';
         res.status(200).send({
             message : 'it has been deleted successfully'
         })
-
-        NonFunction.save_req_res('/group/:groupId/user/:userId','delete',req.userId,201,'it has been deleted successfully',next)  
-
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-          NonFunction.save_req_res('/group/:groupId/user/:userId','delete',req.userId,err.statusCode,err.message,next)  
-
-        next(err);
-    }
 }
 
 
@@ -266,8 +215,6 @@ exports.delete_user_from_group = async (req,res,next) =>{
 
 
 exports.add_file =  async(req,res,next) =>{
-    try
-    {
         const groupId = req.params.groupId;
         if(!req.file )
         {
@@ -319,33 +266,14 @@ exports.add_file =  async(req,res,next) =>{
             createdUserId : req.userId,
             groupId : groupId
         })
-
+        req.message = 'file has been added'
         res.status(201).json({
             message : 'file has been added'
         })
-        NonFunction.save_req_res('/group/add_group','post',req.userId,201,'file has been added',next)  
     }
-    catch(err)
-    {
-        delete fileUrl
-        destination= req.file.destination.split('./public');
-        const fileUrl = destination[1]+'/'+req.file.filename;
-        if(fileUrl)
-        {
-            clearFile(fileUrl);
-        }
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        NonFunction.save_req_res('/group/add_group','post',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    }
-}
   
 
 exports.delete_file = async(req,res,next) => {
-    try
-    {
         const fileId = req.params.fileId;
         const user = User.findByPk(req.userId);
         if(!user)
@@ -378,20 +306,11 @@ exports.delete_file = async(req,res,next) => {
         }
 
         file.destroy();
+        req.message = 'file has been deleted';
         res.status(201).json({
             message : 'file has been deleted'
         })
-        NonFunction.save_req_res('/group/delete_file/:fileId','delete',req.userId,201,'file has been deleted',next)  
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/group/delete_file/:fileId','delete',req.userId,err.statusCode,err.message,next)  
-        
-        next(err);
-    }
+   
 }
 
 

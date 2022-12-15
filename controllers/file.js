@@ -6,7 +6,6 @@ const fs = require('fs');
 const History = require('../models/history');
 const GroupUser = require('../models/group-user');
 const path = require('path');
-const NonFunction = require('./non-functional')
 
 
 
@@ -17,9 +16,7 @@ const Op = Sequelize.Op;
 
 
 
-exports.myfiles = async (req,res,next) =>{
-    try
-    {
+exports. myfiles = async (req,res,next) =>{
         let sending_array = [];
         let myfiles;
         //admin can see all files in database
@@ -70,27 +67,13 @@ exports.myfiles = async (req,res,next) =>{
             }
             i++;
         }
-        res.status(200).send(sending_array);
-        var jsonmessage = JSON.stringify(sending_array);
-        NonFunction.save_req_res('/file/myfiles','get',req.userId,200,jsonmessage,next)  
-
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        NonFunction.save_req_res('/file/myfiles','get',req.userId,err.statusCode,err.message,next)  
-
-        next(err);
-    }
+        req.message = JSON.stringify(sending_array);
+        res.status(200).send(sending_array); 
 }
 
 
 
 exports.show_files_in_group = async (req,res,next) => {
-    try
-    {
         const groupId = req.params.groupId;  
         const group = await Group.findByPk(groupId);
         if(!group)
@@ -161,19 +144,8 @@ exports.show_files_in_group = async (req,res,next) => {
             }
             i++;
         }
+        req.userId = JSON.stringify(sending_array);
         res.status(200).send(sending_array);
-        var jsonmessage = JSON.stringify(sending_array);
-        NonFunction.save_req_res('/file/show_files_in_group/:groupId','get',req.userId,200,jsonmessage,next)  
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        NonFunction.save_req_res('/file/show_files_in_group/:groupId','get',req.userId,err.statusCode,err.message,next)  
-
-        next(err);
-    }
 }
 
 
@@ -182,9 +154,6 @@ exports.show_files_in_group = async (req,res,next) => {
 
 
 exports.read = async (req,res,next) => {
-    try
-    {
-
         const fileId = req.body.fileId;
         const groupId = req.body.groupId;
         const group =  await Group.findByPk(groupId);
@@ -231,30 +200,16 @@ exports.read = async (req,res,next) => {
             error.statusCode = 401;
             throw error;
         }
-    
+        req.message = 'name:'+file.name+"\nfile"+file.fileUrl;
         res.status(200).json({
             name : file.name,
             file : file.fileUrl
         })
-        const message = 'name:'+file.name+"\nfile"+file.fileUrl;
-        NonFunction.save_req_res('/file/read_file','get',req.userId,200,message,next)  
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/file/read_file','get',req.userId,err.statusCode,err.message,next)  
-
-        next(err);
-    }
 }
 
 
 
 exports.check_in = async(req,res,next) =>{
-    try
-    {
         let sending_array  = [];
         const files_array = req.body.files_array;
         const groupId = req.body.groupId;
@@ -333,25 +288,12 @@ exports.check_in = async(req,res,next) =>{
             
             i++;
         }
+        req.message = JSON.stringify(sending_array);
         res.status(200).send(sending_array);
-        var jsonmessage = JSON.stringify(sending_array);
-        NonFunction.save_req_res('/file/check_in','put',req.userId,200,jsonmessage,next)  
     }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/file/check_in','put',req.userId,err.statusCode,err.message,next)  
-
-        next(err);
-    }
-}
 
 
 exports.check_out = async(req,res,next) =>{
-    try
-    {
         const fileId = req.body.fileId;
         let file = await Filee.findByPk(fileId);
         if(!file)
@@ -394,20 +336,10 @@ exports.check_out = async(req,res,next) =>{
             userId : req.userId,
             fileeId  : fileId 
         })
-        
+        req.message = 'file has been closed';
         res.status(200).json({
             message : 'file has been closed'
         })
-        NonFunction.save_req_res('/file/check_out','put',req.userId,200,'file has been closed',next)  
-    }
-    catch(err)
-    {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-        NonFunction.save_req_res('/file/check_out','put',req.userId,err.statusCode,err.message,next)  
-        next(err);
-    }
 }
 
 
