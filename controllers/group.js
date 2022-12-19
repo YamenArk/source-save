@@ -237,11 +237,7 @@ exports.add_file =  async(req,res,next) =>{
             throw error;
         }
         //check if the user in this group
-        if(group.admin == req.userId || req.isAdmin)
-        {
-
-        }
-        else
+        if(group.admin != req.userId && !req.isAdmin)
         {
             const member =await GroupUser.findOne({where : {
                 [Op.and]:[
@@ -256,7 +252,6 @@ exports.add_file =  async(req,res,next) =>{
                 throw error;
             }
         }
-
         destination= req.file.destination.split('./public');
         const fileUrl = destination[1]+'/'+req.file.filename;
         await Filee.create({

@@ -6,6 +6,7 @@ const config1 = require('./util/config1');
 const config2 = require('./util/config2');
 const mysql = require("mysql2");
 const normalizePort = require('normalize-port');
+const logger = require('./util/logger');
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -99,6 +100,12 @@ let current = 0;
 
 User.belongsToMany(Group , {through : GroupUser});
 
+logger.error("error")
+logger.warn("warn")
+logger.info("info")
+logger.verbose("verbose")
+logger.debug("debug")
+logger.silly("silly")
 
 
 
@@ -108,15 +115,14 @@ sequelize
 // .sync({ force: true })
 .sync()
 .then(result => {
-
 server = app.listen(3000, () => {
-    console.log(`API REST running in http://localhost:${3000}`);
+   logger.info(`API REST running in http://localhost:${3000}`);
 });
 app.listen(config1.port, () => {
-  console.log(`API REST running in http://localhost:${config1.port}`);
+  logger.info(`API REST running in http://localhost:${config1.port}`);
 });
 app.listen(config2.port, () => {
-  console.log(`API REST running in http://localhost:${config2.port}`);
+  logger.info(`API REST running in http://localhost:${config2.port}`);
 });
 })
 .catch(err => {

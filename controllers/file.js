@@ -84,11 +84,7 @@ exports.show_files_in_group = async (req,res,next) => {
         }
         //authorization
         //check if the user in this group
-        if(group.admin == req.userId || req.isAdmin)
-        {
-
-        }
-        else
+        if(group.admin != req.userId && !req.isAdmin)
         {
             const member =await GroupUser.findOne({where : {
                 [Op.and]:[
@@ -103,7 +99,6 @@ exports.show_files_in_group = async (req,res,next) => {
                 throw error;
             }
         }
-
 
         let sending_array = [];
         const myfiles = await Filee.findAll({
@@ -159,11 +154,7 @@ exports.read = async (req,res,next) => {
         const group =  await Group.findByPk(groupId);
     
         //check if the user in this group
-        if(group.admin == req.userId || req.isAdmin)
-        {
-    
-        }
-        else
+        if(group.admin != req.userId && !req.isAdmin)
         {
             const member =await GroupUser.findOne({where : {
                 [Op.and]:[

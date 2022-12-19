@@ -69,8 +69,6 @@ exports.file_history = async(req,res,next) => {
 
         req.message = JSON.stringify(sending_message);
 
-        console.log("====================")
-        console.log(req.message)
         res.status(200).send(sending_message);
 }
 
@@ -80,7 +78,7 @@ exports.file_history = async(req,res,next) => {
 exports.user_history = async(req,res,next) => {
         let file;
         const userId = req.body.userId;
-        let sending_message = '';
+        let sending_message = [];
         const user = await History.findAll({where : { userId : userId}})
         if(user.length === 0 )
         {
@@ -94,14 +92,14 @@ exports.user_history = async(req,res,next) => {
             file = await Filee.findByPk(user[i].fileeId);
             if(user[i].status == true)
             {
-                sending_message =sending_message+"user opened file "+file.name+" in "+user[i].createdAt+"\n"
+                sending_message ="user opened file "+file.name+" in "+user[i].createdAt+"\n"
             }
             else
             {
-                sending_message =sending_message+"user closed file "+file.name+" in "+user[i].createdAt+"\n"
+                sending_message ="user closed file "+file.name+" in "+user[i].createdAt+"\n"
             }
             i++;
         }
         req.message = JSON.stringify(sending_message);
-        res.status(200).send(req.message);
+        res.status(200).send(sending_message);
 }
